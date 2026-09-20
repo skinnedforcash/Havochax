@@ -5624,18 +5624,9 @@ local Library = { } do
             Rotation = 90
         })
 
-        Items.BoxOutlineFrame = Create("Frame", {
-            Parent = Items.RenderFrame.Instance,
-            Position = UDim2.fromOffset(-2, -2),
-            Size = UDim2.new(1, 4, 1, 4),
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            ZIndex = 33
-        })
-
         Items.BoxOutline = Create("UIStroke", {
-            Parent = Items.BoxOutlineFrame.Instance,
-            Thickness = 2,
+            Parent = Items.RenderFrame.Instance,
+            Thickness = 3,
             Transparency = 0,
             Color = Color3.new(0, 0, 0),
             LineJoinMode = Enum.LineJoinMode.Miter
