@@ -5537,11 +5537,20 @@ local Library = { } do
             Clip = true,
             Z = 30
         })
-        Items.Root.Instance.Visible = Preview.Visible
+        Items.Root.Instance.Visible = Preview.Visible and Window.IsOpen and Window.Current == Self.Tab
 
         Items.Topbar = MakeFrame({
             Parent = Items.Root.Instance,
             Size = UDim2.new(1, 0, 0, 42),
+            Color = "Section",
+            Round = 10,
+            Z = 31
+        })
+
+        Items.TopbarFill = MakeFrame({
+            Parent = Items.Topbar.Instance,
+            Pos = UDim2.fromOffset(0, 10),
+            Size = UDim2.new(1, 0, 1, -10),
             Color = "Section",
             Z = 31
         })
@@ -5567,7 +5576,7 @@ local Library = { } do
 
         Items.CloseIcon = MakeText({
             Parent = Items.Close.Instance,
-            Text = "×",
+            Text = "X",
             TextSize = 20,
             Anchor = Vector2.new(0.5, 0.5),
             Pos = UDim2.fromScale(0.5, 0.5),
@@ -5596,7 +5605,7 @@ local Library = { } do
         Items.Camera = Create("Camera", {
             Parent = Items.Viewport.Instance,
             CameraType = Enum.CameraType.Scriptable,
-            CFrame = CFrame.lookAt(Vector3.new(0, 2.2, 7), Vector3.new(0, 1.8, 0))
+            CFrame = CFrame.lookAt(Vector3.new(0, 2.5, 8.5), Vector3.new(0, 1.15, 0))
         })
         Items.Viewport.Instance.CurrentCamera = Items.Camera.Instance
 
@@ -5615,10 +5624,19 @@ local Library = { } do
             Rotation = 90
         })
 
-        Items.BoxOutline = Create("UIStroke", {
+        Items.BoxOutlineFrame = Create("Frame", {
             Parent = Items.RenderFrame.Instance,
-            Thickness = 3,
-            Transparency = 0.5,
+            Position = UDim2.fromOffset(-2, -2),
+            Size = UDim2.new(1, 4, 1, 4),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ZIndex = 33
+        })
+
+        Items.BoxOutline = Create("UIStroke", {
+            Parent = Items.BoxOutlineFrame.Instance,
+            Thickness = 2,
+            Transparency = 0,
             Color = Color3.new(0, 0, 0),
             LineJoinMode = Enum.LineJoinMode.Miter
         })
@@ -5889,7 +5907,7 @@ local Library = { } do
 
         function Preview:SetVisibility(Bool)
             Preview.Visible = Bool and true or false
-            Items.Root.Instance.Visible = Preview.Visible
+            Items.Root.Instance.Visible = Preview.Visible and Window.IsOpen and Window.Current == Self.Tab
         end
 
         function Preview:SetHealth(Health, MaxHealth)
@@ -5909,13 +5927,25 @@ local Library = { } do
             Items.Root.Instance:Destroy()
         end
 
-        Items.Root:MakeDraggable(Items.Topbar.Instance)
         Items.Close:Connect("MouseButton1Down", function()
             Preview:SetVisibility(false)
         end)
 
         Library:Connect(RunService.RenderStepped, function()
-            if Preview.Visible then
+            local CurrentScale = Library:GetScreenScale()
+            local CurrentMain = Window.Items and Window.Items.Main and Window.Items.Main.Instance
+            local Active = Preview.Visible and Window.IsOpen and Window.Current == Self.Tab
+
+            Items.Root.Instance.Visible = Active
+
+            if CurrentMain then
+                Items.Root.Instance.Position = UDim2.fromOffset(
+                    (CurrentMain.AbsolutePosition.X + CurrentMain.AbsoluteSize.X) / CurrentScale + 10,
+                    CurrentMain.AbsolutePosition.Y / CurrentScale
+                )
+            end
+
+            if Active then
                 Preview:Refresh()
             end
         end)
