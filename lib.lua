@@ -5604,7 +5604,7 @@ local Library = { } do
         Items.Camera = Create("Camera", {
             Parent = Items.Viewport.Instance,
             CameraType = Enum.CameraType.Scriptable,
-            CFrame = CFrame.lookAt(Vector3.new(0, 2.5, 4), Vector3.new(0, 0.65, 0))
+            CFrame = CFrame.lookAt(Vector3.new(0, 2.5, 2.1), Vector3.new(0, 0.65, 0))
         })
         Items.Viewport.Instance.CurrentCamera = Items.Camera.Instance
 
@@ -5868,7 +5868,7 @@ local Library = { } do
             local ModelCFrame = Model:GetBoundingBox()
             local Center = ModelCFrame.Position
             local Target = Center - Vector3.new(0, 0.25, 0)
-            Camera.CFrame = CFrame.lookAt(Target + Vector3.new(0, 0.25, 4), Target)
+            Camera.CFrame = CFrame.lookAt(Target + Vector3.new(0, 0.25, 2.1), Target)
             local CameraSize = Camera.ViewportSize
             local FrameSize = Items.Viewport.Instance.AbsoluteSize
             local ScaleX = FrameSize.X / math.max(CameraSize.X, 1)
