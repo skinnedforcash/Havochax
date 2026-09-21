@@ -5605,7 +5605,7 @@ local Library = { } do
         Items.Camera = Create("Camera", {
             Parent = Items.Viewport.Instance,
             CameraType = Enum.CameraType.Scriptable,
-            CFrame = CFrame.lookAt(Vector3.new(0, 2.5, 8.5), Vector3.new(0, 1.15, 0))
+            CFrame = CFrame.lookAt(Vector3.new(0, 2.5, 9.25), Vector3.new(0, 0.65, 0))
         })
         Items.Viewport.Instance.CurrentCamera = Items.Camera.Instance
 
@@ -5624,9 +5624,18 @@ local Library = { } do
             Rotation = 90
         })
 
-        Items.BoxOutline = Create("UIStroke", {
+        Items.BoxOuter = Create("Frame", {
             Parent = Items.RenderFrame.Instance,
-            Thickness = 3,
+            Position = UDim2.fromOffset(-1, -1),
+            Size = UDim2.new(1, 2, 1, 2),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ZIndex = 33
+        })
+
+        Items.BoxOutline = Create("UIStroke", {
+            Parent = Items.BoxOuter.Instance,
+            Thickness = 1,
             Transparency = 0,
             Color = Color3.new(0, 0, 0),
             LineJoinMode = Enum.LineJoinMode.Miter
@@ -5642,6 +5651,23 @@ local Library = { } do
         Items.BoxGradient = Create("UIGradient", {
             Parent = Items.BoxAccent.Instance,
             Rotation = 90
+        })
+
+        Items.BoxInner = Create("Frame", {
+            Parent = Items.RenderFrame.Instance,
+            Position = UDim2.fromOffset(1, 1),
+            Size = UDim2.new(1, -2, 1, -2),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ZIndex = 35
+        })
+
+        Items.BoxInnerStroke = Create("UIStroke", {
+            Parent = Items.BoxInner.Instance,
+            Thickness = 1,
+            Transparency = 0,
+            Color = Color3.new(0, 0, 0),
+            LineJoinMode = Enum.LineJoinMode.Miter
         })
 
         Items.Glow = Create("ImageLabel", {
@@ -5845,6 +5871,7 @@ local Library = { } do
 
             Items.BoxOutline.Instance.Enabled = Box
             Items.BoxAccent.Instance.Enabled = Box
+            Items.BoxInnerStroke.Instance.Enabled = Box
             Items.BoxGradient.Instance.Color = ColorSequence.new(BoxHigh, BoxLow)
             Items.BoxGradient.Instance.Rotation = Flags["ESP Box Gradient Rotation"] or 0
             Items.RenderFrame.Instance.BackgroundTransparency = Fill and 0 or 1
