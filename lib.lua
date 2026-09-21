@@ -5496,12 +5496,10 @@ local Library = { } do
         local Items = Preview.Items
         local Width = Params.Width or 265
         local Height = Params.Height or 355
-        local Root = Library.Holder.Instance
-        local Scale = Library:GetScreenScale()
+        local Root = Window.Items and Window.Items.Root and Window.Items.Root.Instance or Library.Holder.Instance
         local Main = Window.Items and Window.Items.Main and Window.Items.Main.Instance
-        local Rail = Window.Items and Window.Items.Rail and Window.Items.Rail.Instance
-        local X = Params.X or (Main and ((Main.AbsolutePosition.X + Main.AbsoluteSize.X) / Scale + 10) or 10)
-        local Y = Params.Y or (Rail and (Rail.AbsolutePosition.Y / Scale) or (Main and (Main.AbsolutePosition.Y / Scale) or 10))
+        local X = Params.X or (Main and (Main.Position.X.Offset + Main.Size.X.Offset + 10) or 10)
+        local Y = Params.Y or (Main and (Main.Position.Y.Offset + math.floor((Main.Size.Y.Offset - Height) / 2)) or 10)
 
         local function Create(Class, Properties)
             Properties.Name = "\0"
@@ -5606,7 +5604,7 @@ local Library = { } do
         Items.Camera = Create("Camera", {
             Parent = Items.Viewport.Instance,
             CameraType = Enum.CameraType.Scriptable,
-            CFrame = CFrame.lookAt(Vector3.new(0, 2.5, 9.25), Vector3.new(0, 0.65, 0))
+            CFrame = CFrame.lookAt(Vector3.new(0, 2.5, 6.4), Vector3.new(0, 0.65, 0))
         })
         Items.Viewport.Instance.CurrentCamera = Items.Camera.Instance
 
@@ -6012,17 +6010,15 @@ local Library = { } do
         end)
 
         Library:Connect(RunService.RenderStepped, function()
-            local CurrentScale = Library:GetScreenScale()
             local CurrentMain = Window.Items and Window.Items.Main and Window.Items.Main.Instance
-            local CurrentRail = Window.Items and Window.Items.Rail and Window.Items.Rail.Instance
             local Active = Preview.Visible and Window.IsOpen and Window.Current == Self.Tab
 
             Items.Root.Instance.Visible = Active
 
             if CurrentMain then
                 Items.Root.Instance.Position = UDim2.fromOffset(
-                    (CurrentMain.AbsolutePosition.X + CurrentMain.AbsoluteSize.X) / CurrentScale + 10,
-                    (CurrentRail and CurrentRail.AbsolutePosition.Y or CurrentMain.AbsolutePosition.Y) / CurrentScale
+                    CurrentMain.Position.X.Offset + CurrentMain.Size.X.Offset + 10,
+                    CurrentMain.Position.Y.Offset + math.floor((CurrentMain.Size.Y.Offset - Height) / 2)
                 )
             end
 
