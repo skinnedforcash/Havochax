@@ -5499,8 +5499,9 @@ local Library = { } do
         local Root = Library.Holder.Instance
         local Scale = Library:GetScreenScale()
         local Main = Window.Items and Window.Items.Main and Window.Items.Main.Instance
+        local Rail = Window.Items and Window.Items.Rail and Window.Items.Rail.Instance
         local X = Params.X or (Main and ((Main.AbsolutePosition.X + Main.AbsoluteSize.X) / Scale + 10) or 10)
-        local Y = Params.Y or (Main and (Main.AbsolutePosition.Y / Scale) or 10)
+        local Y = Params.Y or (Rail and (Rail.AbsolutePosition.Y / Scale) or (Main and (Main.AbsolutePosition.Y / Scale) or 10))
 
         local function Create(Class, Properties)
             Properties.Name = "\0"
@@ -5846,6 +5847,67 @@ local Library = { } do
             end
         end
 
+        local Corners = {
+            Vector3.new(-0.5, -0.5, -0.5),
+            Vector3.new(-0.5, -0.5, 0.5),
+            Vector3.new(-0.5, 0.5, -0.5),
+            Vector3.new(-0.5, 0.5, 0.5),
+            Vector3.new(0.5, -0.5, -0.5),
+            Vector3.new(0.5, -0.5, 0.5),
+            Vector3.new(0.5, 0.5, -0.5),
+            Vector3.new(0.5, 0.5, 0.5)
+        }
+
+        local function UpdateBounds()
+            local Model = Preview.Player
+
+            if not Model then return end
+
+            local MinX, MinY = math.huge, math.huge
+            local MaxX, MaxY = -math.huge, -math.huge
+            local Found = false
+            local Camera = Items.Camera.Instance
+            local CameraSize = Camera.ViewportSize
+            local FrameSize = Items.Viewport.Instance.AbsoluteSize
+            local ScaleX = FrameSize.X / math.max(CameraSize.X, 1)
+            local ScaleY = FrameSize.Y / math.max(CameraSize.Y, 1)
+
+            for _, Part in Model:GetDescendants() do
+                if not Part:IsA("BasePart") then continue end
+
+                local Half = Part.Size * 0.5
+
+                for _, Corner in Corners do
+                    local WorldPoint = Part.CFrame:PointToWorldSpace(Vector3.new(
+                        Corner.X * Half.X * 2,
+                        Corner.Y * Half.Y * 2,
+                        Corner.Z * Half.Z * 2
+                    ))
+                    local Point = Camera:WorldToViewportPoint(WorldPoint)
+
+                    if Point.Z <= 0 then continue end
+
+                    local X = Point.X * ScaleX
+                    local Y = Point.Y * ScaleY
+
+                    MinX = math.min(MinX, X)
+                    MinY = math.min(MinY, Y)
+                    MaxX = math.max(MaxX, X)
+                    MaxY = math.max(MaxY, Y)
+                    Found = true
+                end
+            end
+
+            if not Found then return end
+
+            local Padding = 2
+            Items.RenderFrame.Instance.Position = UDim2.fromOffset(math.floor(MinX - Padding), math.floor(MinY - Padding))
+            Items.RenderFrame.Instance.Size = UDim2.fromOffset(
+                math.ceil(MaxX - MinX + Padding * 2),
+                math.ceil(MaxY - MinY + Padding * 2)
+            )
+        end
+
         function Preview:Refresh()
             local Box = Flags["ESP Box"] and true or false
             local Fill = Box and Flags["ESP Box Filled"] and true or false
@@ -5952,6 +6014,7 @@ local Library = { } do
         Library:Connect(RunService.RenderStepped, function()
             local CurrentScale = Library:GetScreenScale()
             local CurrentMain = Window.Items and Window.Items.Main and Window.Items.Main.Instance
+            local CurrentRail = Window.Items and Window.Items.Rail and Window.Items.Rail.Instance
             local Active = Preview.Visible and Window.IsOpen and Window.Current == Self.Tab
 
             Items.Root.Instance.Visible = Active
@@ -5959,11 +6022,12 @@ local Library = { } do
             if CurrentMain then
                 Items.Root.Instance.Position = UDim2.fromOffset(
                     (CurrentMain.AbsolutePosition.X + CurrentMain.AbsoluteSize.X) / CurrentScale + 10,
-                    CurrentMain.AbsolutePosition.Y / CurrentScale
+                    (CurrentRail and CurrentRail.AbsolutePosition.Y or CurrentMain.AbsolutePosition.Y) / CurrentScale
                 )
             end
 
             if Active then
+                UpdateBounds()
                 Preview:Refresh()
             end
         end)
